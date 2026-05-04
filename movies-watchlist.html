@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movies Watch List - React App</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        #root {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #999;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        /* Input Section */
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        #movieInput {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        #movieInput:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .add-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .add-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .add-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Stats Section */
+        .stats {
+            background: #f5f5f5;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        /* Movies Grid */
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .movie-card {
+            background: white;
+            border: 2px solid #f0f0f0;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .movie-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .movie-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .movie-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            word-break: break-word;
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .delete-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .delete-btn:hover {
+            background: #ff5252;
+        }
+
+        /* Rating Section */
+        .rating-section {
+            margin: 15px 0;
+            padding: 15px;
+            background: #fafafa;
+            border-radius: 10px;
+        }
+
+        .rating-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .stars {
+            display: flex;
+            gap: 5px;
+            font-size: 2rem;
+        }
+
+        .star {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            filter: brightness(0.8);
+        }
+
+        .star:hover {
+            transform: scale(1.2);
+            filter: brightness(1);
+        }
+
+        .star.filled {
+            filter: brightness(1);
+        }
+
+        .rating-display {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Review Section */
+        .review-section {
+            margin: 15px 0;
+        }
+
+        .review-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .review-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.3s ease;
+        }
+
+        .review-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.2);
+        }
+
+        .review-text {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .review-text.empty {
+            color: #999;
+            font-style: italic;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        /* Animation */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .movie-card {
+            animation: slideIn 0.3s ease;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .input-section {
+                flex-direction: column;
+            }
+
+            #movieInput {
+                min-width: unset;
+            }
+
+            .movies-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stars {
+                font-size: 1.5rem;
+            }
+
+            .stats {
+                gap: 15px;
+            }
+
+            .movie-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .delete-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Movie Card Component
+        function MovieCard({ movie, onDelete, onUpdateReview, onUpdateRating }) {
+            const displayRating = movie.rating || 0;
+            const stars = [1, 2, 3, 4, 5];
+
+            return (
+                <div className="movie-card">
+                    <div className="movie-header">
+                        <h2 className="movie-title">{movie.title}</h2>
+                        <button
+                            className="delete-btn"
+                            onClick={() => onDelete(movie.id)}
+                        >
+                            Delete
+                        </button>
+                    </div>
+
+                    <div className="rating-section">
+                        <label className="rating-label">Rating</label>
+                        <div className="stars">
+                            {stars.map((star) => (
+                                <span
+                                    key={star}
+                                    className={`star ${star <= displayRating ? 'filled' : ''}`}
+                                    onClick={() => onUpdateRating(movie.id, star)}
+                                    title={`Rate ${star} stars`}
+                                >
+                                    ⭐
+                                </span>
+                            ))}
+                        </div>
+                        <div className="rating-display">
+                            {displayRating > 0
+                                ? `${displayRating} out of 5 stars`
+                                : 'Click stars to rate'}
+                        </div>
+                    </div>
+
+                    <div className="review-section">
+                        <label className="review-label">Review</label>
+                        <textarea
+                            className="review-input"
+                            placeholder="Write your review here..."
+                            value={movie.review || ''}
+                            onChange={(e) =>
+                                onUpdateReview(movie.id, e.target.value)
+                            }
+                        />
+                        {movie.review && (
+                            <div className="review-text">{movie.review}</div>
+                        )}
+                        {!movie.review && (
+                            <div className="review-text empty">
+                                No review yet
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Main App Component
+        function MoviesWatchList() {
+            const [movies, setMovies] = useState([]);
+            const [inputValue, setInputValue] = useState('');
+
+            // Add Movie Handler
+            const handleAddMovie = () => {
+                if (inputValue.trim() === '') {
+                    alert('Please enter a movie title');
+                    return;
+                }
+
+                const newMovie = {
+                    id: Date.now(),
+                    title: inputValue.trim(),
+                    review: '',
+                    rating: 0
+                };
+
+                setMovies([newMovie, ...movies]);
+                setInputValue('');
+            };
+
+            // Delete Movie Handler
+            const handleDeleteMovie = (id) => {
+                setMovies(movies.filter((movie) => movie.id !== id));
+            };
+
+            // Update Review Handler
+            const handleUpdateReview = (id, newReview) => {
+                setMovies(
+                    movies.map((movie) =>
+                        movie.id === id ? { ...movie, review: newReview } : movie
+                    )
+                );
+            };
+
+            // Update Rating Handler
+            const handleUpdateRating = (id, newRating) => {
+                setMovies(
+                    movies.map((movie) =>
+                        movie.id === id ? { ...movie, rating: newRating } : movie
+                    )
+                );
+            };
+
+            // Handle Enter Key
+            const handleKeyPress = (e) => {
+                if (e.key === 'Enter') {
+                    handleAddMovie();
+                }
+            };
+
+            // Calculate Statistics
+            const totalMovies = movies.length;
+            const ratedMovies = movies.filter((m) => m.rating > 0).length;
+            const reviewedMovies = movies.filter((m) => m.review.trim() !== '')
+                .length;
+
+            return (
+                <div className="container">
+                    <h1>🎬 Movies Watch List</h1>
+                    <p className="subtitle">
+                        Manage your watched movies with ratings and reviews
+                    </p>
+
+                    {/* Input Section */}
+                    <div className="input-section">
+                        <input
+                            id="movieInput"
+                            type="text"
+                            placeholder="Enter movie title..."
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            autoFocus
+                        />
+                        <button className="add-btn" onClick={handleAddMovie}>
+                            + Add Movie
+                        </button>
+                    </div>
+
+                    {/* Statistics */}
+                    {totalMovies > 0 && (
+                        <div className="stats">
+                            <div className="stat-item">
+                                <div className="stat-number">{totalMovies}</div>
+                                <div className="stat-label">Total Movies</div>
+                            </div>
+                            <div className="stat-item">
+                                <div className="stat-number">{ratedMovies}</div>
+                                <div className="stat-label">Rated</div>
+                            </div>
+                            <div className="stat-item">
+                                <div className="stat-number">
+                                    {reviewedMovies}
+                                </div>
+                                <div className="stat-label">Reviewed</div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Movies List */}
+                    {totalMovies === 0 ? (
+                        <div className="empty-state">
+                            <div className="empty-state-icon">🎞️</div>
+                            <p>No movies yet. Add one to get started!</p>
+                        </div>
+                    ) : (
+                        <div className="movies-grid">
+                            {movies.map((movie) => (
+                                <MovieCard
+                                    key={movie.id}
+                                    movie={movie}
+                                    onDelete={handleDeleteMovie}
+                                    onUpdateReview={handleUpdateReview}
+                                    onUpdateRating={handleUpdateRating}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Render App
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<MoviesWatchList />);
+    </script>
+</body>
+</html>
